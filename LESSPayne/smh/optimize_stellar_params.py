@@ -706,7 +706,8 @@ def optimize_feh(
     idx_II = transitions["ion"] == 2
 
     # set slope optimizer index in the transition table based on parameter
-    feh_index = idx_II if optimize_vt_to_fe2 else idx_I
+    feh_index = 26.1 if optimize_vt_to_fe2 else 26.0
+    logger.info(f"FEH INDEX IS {feh_index}")
 
     photosphere_interpolator = photospheres.interpolator()
 
@@ -776,9 +777,9 @@ def optimize_feh(
         abundances = rt.abundance_cog(photosphere, transitions, twd=twd)
         transitions["abundance"] = abundances
 
-        out = utils.equilibrium_state(transitions[feh_index],
+        out = utils.equilibrium_state(transitions[idx_I | idx_II],
                                       ("expot", "reduced_equivalent_width"))
-        dAdchi = out[idx_I]["expot"][0]  # excitation potential slope (Teff)
+        dAdchi = out[26.0]["expot"][0]  # excitation potential slope (Teff)
         dAdREW = out[feh_index]["reduced_equivalent_width"][
             0]  # REW slope (vt)
         dFe = np.mean(abundances[idx_I]) - np.mean(

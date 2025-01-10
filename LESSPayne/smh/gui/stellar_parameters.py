@@ -416,13 +416,13 @@ class StellarParametersTab(QtGui.QWidget):
         self.measure_abundances()
         self.new_session_loaded()
 
-    def set_session_vt_optimize(self) -> None:
+    def set_session_vt_optimize(self, *args) -> None:
         """Sets the session to optimize via [Fe I/H] OR [Fe II/H] based on combobox state."""
-        self.optimize_vt_to_fe2 = True if self.vt_opt_cb.currentIndex == 1 else False
+        self.optimize_vt_to_fe2 = True if self.vt_opt_cb.currentIndex(
+        ) == 1 else False
 
         # automatically rerun optimizer to save user a worthless button press
         self.solve_feh()
-
         return
 
     def _init_rt_options(self, parent):
@@ -563,7 +563,7 @@ class StellarParametersTab(QtGui.QWidget):
 
         # combobox for Fe I or Fe II microturbulence optimization
         label = QtGui.QLabel(self)
-        label.setText("")
+        label.setText("Solve vt (dA/dREW) against")
         label.setSizePolicy(
             QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,
                               QtGui.QSizePolicy.Minimum))
@@ -571,6 +571,11 @@ class StellarParametersTab(QtGui.QWidget):
         grid_layout.addWidget(label, 5, 0, 1, 1)
 
         self.vt_opt_cb = QtGui.QComboBox()
+        self.vt_opt_cb.setMinimumSize(QtCore.QSize(40, 0))
+        self.vt_opt_cb.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.vt_opt_cb.setSizePolicy(
+            QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding,
+                              QtGui.QSizePolicy.Minimum))
         self.vt_opt_cb.addItems(["Fe I", "Fe II"])
         grid_layout.addWidget(self.vt_opt_cb, 5, 1)
 
