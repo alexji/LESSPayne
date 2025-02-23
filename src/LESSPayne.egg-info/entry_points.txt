@@ -1,0 +1,5 @@
+[console_scripts]
+lesspayne = lesspayne.cli:run
+
+[gui_scripts]
+smhr = lesspayne.smh.gui.__main__:run_gui

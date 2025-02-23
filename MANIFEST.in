@@ -1,0 +1,7 @@
+include src/lesspayne/data/*
+include src/lesspayne/data/template_spectra/*
+include src/lesspayne/data/linelists/*
+include src/lesspayne/data/linelists/synthesis_lists/*
+include src/lesspayne/smh/data/isotopes/*
+include src/lesspayne/smh/data/spectra/*
+include src/lesspayne/PayneEchelle/other_data/*
