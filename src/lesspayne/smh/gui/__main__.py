@@ -22,7 +22,7 @@ sys.path.insert(0, smhr_rpa_path)
 # Functions related to warnings and exceptions.
 import exception
 
-import smh
+from lesspayne import smh
 
 logger = logging.getLogger(__name__)
 logger.addHandler(smh.handler)
