@@ -22,7 +22,7 @@ if __name__=="__main__":
     parser.add_option("-3", "--eqw", dest="run_equivalent_width", action="store_true", default=False)
     parser.add_option("-4", "--params", dest="run_stellar_parameters", action="store_true", default=False)
     parser.add_option("-5", "--synth", dest="run_synthesis", action="store_true", default=False)
-    parser.add_option("-6", "--resynth", dest="run_synthesis_refit", action="store_true", default=False)
+    parser.add_option("-6", "--resynth", dest="run_synthesis_resynth", action="store_true", default=False)
     parser.add_option("-7", "--errors", dest="run_errors", action="store_true", default=False)
     parser.add_option("-8", "--summary", dest="run_summary", action="store_true", default=False)
     
