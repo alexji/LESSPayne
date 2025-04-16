@@ -160,6 +160,10 @@ class Ui_MainWindow(QtGui.QMainWindow):
                 statusTip="Export a coadded rest-frame spectrum resampled "
                           "onto a common wavelength mapping",
                 triggered=self.export_unnormalized_spectrum)
+        self._menu_export_normalized_orders \
+            = QtGui.QAction("Normalized orders", self,
+                statusTip="Export the normalized orders",
+                triggered=self.export_normalized_orders)
         self._menu_export_stitched_continuum \
             = QtGui.QAction("Stitched continuum", self,
                 statusTip="Export a coadded continuum",
@@ -180,6 +184,7 @@ class Ui_MainWindow(QtGui.QMainWindow):
         export_menu = self.menuBar().addMenu("&Export")
         export_menu.addAction(self._menu_export_normalized_spectrum)
         export_menu.addAction(self._menu_export_unnormalized_spectrum)
+        export_menu.addAction(self._menu_export_normalized_orders)
         export_menu.addAction(self._menu_export_stitched_continuum)
         export_menu.addAction(self._menu_print_abundance_table)
         export_menu.addAction(self._menu_export_abundance_table)
@@ -458,6 +463,14 @@ class Ui_MainWindow(QtGui.QMainWindow):
             caption="Enter unnormalized rest frame spectrum filename", directory="", filter="")
         if not path: return
         self.session.export_unnormalized_spectrum(path)
+
+    def export_normalized_orders(self):
+        """ Export a normalized, rest-frame individual orders. """
+        if self.session is None: return
+        path, _ = QtGui.QFileDialog.getSaveFileName(self,
+            caption="Enter normalized rest frame alexspec format orders filename", directory="", filter="")
+        if not path: return
+        self.session.export_normalized_orders(path, overwrite=True)
 
     def export_stitched_continuum(self):
         """ Export a stitched continuum. """
