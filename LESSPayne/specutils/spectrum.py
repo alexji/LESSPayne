@@ -295,9 +295,15 @@ class Spectrum1D(object):
                 i += 1
 
             # Split the concatenated header into individual orders.
-            order_mapping = np.array([list(map(float, each.rstrip('" ').split())) \
-                for each in re.split('spec[0-9]+ ?= ?"', concatenated_wat)[1:]])
-            print(order_mapping)
+            try:
+                order_mapping = np.array([list(map(float, each.rstrip('" ').split())) \
+                    for each in re.split('spec[0-9]+ ?= ?"', concatenated_wat)[1:]])
+            except Exception as e:
+                logger.debug("Error in parsing concatenated_wat")
+                logger.debug(e)
+                logger.debug(concatenated_wat)
+                raise
+            
             if len(order_mapping)==0:
                 NAXIS1 = metadata["NAXIS1"]
                 NAXIS2 = metadata["NAXIS2"]
@@ -399,6 +405,7 @@ class Spectrum1D(object):
         is_carpy_mike_product_old = (md5_hash == "e802331006006930ee0e60c7fbc66cec")
         is_carpy_mage_product = (md5_hash == "6b2c2ec1c4e1b122ccab15eb9bd305bc")
         is_iraf_3band_product = (md5_hash == "a4d8f6f51a7260fce1642f7b42012969")
+        is_iraf_4band_product = (md5_hash == "30fdecbbc94c9393c73537eefb02efda")
         is_apo_product = (image[0].header.get("OBSERVAT", None) == "APO")
         is_dupont_product = (md5_hash == "2ab648afed96dcff5ccd10e5b45730c1")
         is_mcdonald_product = (image[0].header.get("OBSERVAT", "").strip() == "MCDONALD")
@@ -426,6 +433,23 @@ class Spectrum1D(object):
             
             logger.info(
                 "Recognized IRAF 3band product. Using zero-indexed flux/noise "
+                "extensions (bands) {}/{}".format(flux_ext, noise_ext))
+            logger.info(
+                image[0].header["BANDID{}".format(flux_ext+1)]
+            )
+            logger.info(
+                image[0].header["BANDID{}".format(noise_ext+1)]
+            )
+            
+            flux = image[0].data[flux_ext]
+            ivar = image[0].data[noise_ext]**(-2)
+
+        elif is_iraf_4band_product:
+            flux_ext = flux_ext or 0
+            noise_ext = ivar_ext or 3
+            
+            logger.info(
+                "Recognized IRAF 4band product. Using zero-indexed flux/noise "
                 "extensions (bands) {}/{}".format(flux_ext, noise_ext))
             logger.info(
                 image[0].header["BANDID{}".format(flux_ext+1)]

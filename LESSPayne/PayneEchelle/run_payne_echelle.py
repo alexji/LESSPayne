@@ -65,6 +65,7 @@ def run_payne_echelle(cfg):
     wmin, wmax = pcfg["wmin"], pcfg["wmax"]
     mask_list = pcfg["mask_list"]
     rv_target_wavelengths = pcfg["rv_target_wavelengths"]
+    fit_all_files = pcfg.get("fit_all_files", False)
     
     if NNtype == "default":
         Teff0, logg0, MH0, aFe0 = pcfg["initial_parameters"]["Teff"], pcfg["initial_parameters"]["logg"], \
@@ -98,7 +99,18 @@ def run_payne_echelle(cfg):
         print(f"Initial RV {rv0:.1f}")
     
     ## Preprocess the spectrum
-    wavelength, spectrum, spectrum_err = read_spectrum(specfname)
+    if fit_all_files:
+        wavelengths, spectrums, spectrum_errs = [], [], []
+        for fname in fnames:
+            wavelength, spectrum, spectrum_err = read_spectrum(specfname)
+            wavelengths.append(wavelength)
+            spectrums.append(spectrum)
+            spectrum_errs.append(spectrum_err)
+        wavelength = np.vstack(wavelengths)
+        spectrum = np.vstack(spectrums)
+        spectrum_err = np.vstack(spectrum_errs)
+    else: # fit first file
+        wavelength, spectrum, spectrum_err = read_spectrum(specfname)
     wavelength_blaze = wavelength.copy() # blaze and spec have same
     spectrum_blaze = get_quick_continuum(wavelength, spectrum)
     wavelength, spectrum, spectrum_err = utils.cut_wavelength(wavelength, spectrum, spectrum_err, wmin, wmax)
@@ -109,6 +121,11 @@ def run_payne_echelle(cfg):
     spectrum_err[(spectrum_err==0) | np.isnan(spectrum_err)] = 999.
     spectrum_blaze = np.abs(spectrum_blaze)    
     spectrum_blaze[spectrum_blaze == 0] = 1.
+    
+    if np.any(np.isnan(spectrum)):
+        raise ValueError("there are nan values in the spectrum, this is not allowed")
+    if np.any(np.isnan(spectrum_err)):
+        raise ValueError("there are nan values in the spectrum error, this is not allowed")
     
     # rescale the spectra by its median so it has a more reasonable y-range
     spectrum, spectrum_err = utils.scale_spectrum_by_median(spectrum, spectrum_err.copy())
