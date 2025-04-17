@@ -112,7 +112,19 @@ def update_abundance_table_2(session, model):
             fitted_result[0][key] = abund
             fitted_result[2]["abundances"][i] = abund
 
-def run_synth_fit(cfg):
+def run_synth_fit(cfg, resynth=False):
+    """
+    Run the synthesis fitting step.
+    Parameters:
+    cfg (dict): Configuration dictionary containing the following keys:
+    resynth (bool, optional): Flag to indicate if resynthting. Default is False.
+                            If True: does not delete or import any synthesis lines,
+                            and only resynths checked lines.
+
+                            
+    Returns:
+    None
+    """
     name = cfg["output_name"]
     NNpath = cfg["NN_file"]
     outdir = cfg["output_directory"]
@@ -142,7 +154,11 @@ def run_synth_fit(cfg):
     if smh_fname == smh_outfname:
         print("(Overwriting the file)")
 
-    notes = "run_synth_fit:\n"
+    if resynth:
+        notes = "run_synth_resynth:\n"
+    else:
+        notes = "run_synth_fit:\n"
+    
     keys = ["max_fwhm","synthesis_linelist_fname","extra_synthesis_linelist_fname",
             "num_iter_all","smooth_approx","smooth_scale","max_iter_each"]
     for key in keys:
@@ -154,7 +170,7 @@ def run_synth_fit(cfg):
     ## Load results of normalization
     session = Session.load(smh_fname)
     
-    if scfg["clear_all_existing_syntheses"]:
+    if scfg["clear_all_existing_syntheses"] and (not resynth):
         synthesis_models = [x for x in session.spectral_models if isinstance(x, SpectralSynthesisModel)]
         print(f"clear_all_existing_syntheses: removing {len(synthesis_models)} pre-existing syntheses")
         for m in synthesis_models: session.metadata["spectral_models"].remove(m)
@@ -162,7 +178,7 @@ def run_synth_fit(cfg):
     ## Step 8: measure abundances
     session.measure_abundances() # eqw
     ## Run syntheses
-    if synthesis_fname is not None:
+    if synthesis_fname is not None and (not resynth):
         print(f"Importing {synthesis_fname}")
         num_added = session.import_master_list(synthesis_fname)
         
@@ -173,6 +189,7 @@ def run_synth_fit(cfg):
         print("===========================================")
         for model in session.spectral_models:
             if isinstance(model, ProfileFittingModel): continue
+            if resynth and not model.is_acceptable: continue
             if model.user_flag:
                 print("Skipping {} {} due to flag".format(model.wavelength, model.species))
                 continue
@@ -200,6 +217,7 @@ def run_synth_fit(cfg):
         print("===========================================")
         for model in session.spectral_models:
             if isinstance(model, ProfileFittingModel): continue
+            if resynth and not model.is_acceptable: continue
             if model.user_flag:
                 print("Skipping {} {} due to flag".format(model.wavelength, model.species))
                 continue
@@ -216,6 +234,7 @@ def run_synth_fit(cfg):
     # Check for detections in final fits
     for model in session.spectral_models:
         if isinstance(model, SpectralSynthesisModel):
+            if resynth and not model.is_acceptable: continue
             threesigma_detection, delta_chi2 = model.check_line_detection(sigma=3)
             if not threesigma_detection:
                 model.is_acceptable = False
@@ -236,7 +255,7 @@ def run_synth_fit(cfg):
     if num_removed > 0:
         print(f"Removed {num_removed}/{len(session.spectral_models)} lines with FWHM > {max_fwhm}")
     
-    if synthesis_fname_extra is not None:
+    if (synthesis_fname_extra is not None) and (not resynth):
         print("Importing extra synthesis master list")
         session.import_master_list(synthesis_fname_extra)
     

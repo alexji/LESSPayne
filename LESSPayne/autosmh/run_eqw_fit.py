@@ -53,11 +53,18 @@ def run_eqw_fit(cfg):
 
     ## Step 5: create linelist with masks
     session.import_linelist_as_profile_models(linelist_fname)
+    if ecfg.get("mask_cosmic_rays",False): # TODO set this to something reasonable
+        # TODO allow these numbers to be changed
+        session.identify_cosmic_rays(mask_sigma=5.0, mask_smooth=2, mask_thresh=0.15, dwave=0.01)
+        exclude_regions_cosmic = session.metadata["cosmic_ray_masks"]
+    else:
+        exclude_regions_cosmic = []
     for model in session.spectral_models:
         w0 = model.wavelength
         w1, w2 = w0 - model.metadata["window"], w0 + model.metadata["window"]
         # keep if within w1 and w2 AND w0 not in region
         this_exclude = [x for x in all_exclude_regions_2 if (x[1] > w1 and x[0] < w2) and ~(w0 > x[0] and w0 < x[1])]
+        this_exclude += [x for x in exclude_regions_cosmic if (x[1] > w1 and x[0] < w2)]
         model.metadata["mask"] = this_exclude
         try:
             model.fit()
@@ -65,22 +72,21 @@ def run_eqw_fit(cfg):
             print(f"failed on species={model.species} wave={model.wavelength}")
     print(f"Time to add masks to normalizations and import models: {time.time()-startall:.1f}")
     
-#    ## Step 6: some quality control
-#    for model in session.spectral_models:
-#        if not model.is_acceptable: continue
-#        if (model.reduced_equivalent_width > -4.5) or (model.reduced_equivalent_width < -5.5):
-#            model.is_acceptable = False
-#    
-    
-    num_removed = 0
-    for model in session.spectral_models:
-        if model.is_acceptable and (model.fwhm > max_fwhm):
-            model.is_acceptable = False
-            model.user_flag = True
-            num_removed += 1
-    if num_removed > 0:
-        print(f"Removed {num_removed}/{len(session.spectral_models)} lines with FWHM > {max_fwhm}")
 
+#    ## Step 6: some quality control
+    if True: # TODO update this to run differently with ecfg
+        num_removed = 0
+        for model in session.spectral_models:
+            if model.is_acceptable and (model.fwhm > max_fwhm):
+                model.is_acceptable = False
+                model.user_flag = True
+                num_removed += 1
+        if num_removed > 0:
+            print(f"Removed {num_removed}/{len(session.spectral_models)} lines with FWHM > {max_fwhm}")
+    else:
+        session.apply_spectral_model_quality_control(max_fwhm=max_fwhm, max_redchi2=4,
+                                                     max_slope_sigma=2.5, max_ok_slope=0.0001,
+                                                     set_user_flag=True)
     
     notes = f"run_eqw_fit:\n  {linelist_fname}"
     if linelist_extra_fname is not None:

@@ -50,7 +50,7 @@ default_kws = dict(
         save_figures = False,
     ),
     run_normalization = dict(
-        mask_sigma = 0.5,
+        mask_sigma = 4.0,
         mask_smooth = 2,
         mask_thresh = 0.15,
         max_mask_frac = 0.8,
@@ -59,13 +59,13 @@ default_kws = dict(
         red_trim = 30,
         continuum_spline_order = 3,
         continuum_max_iterations = 5,
-        save_figure = True,
+        save_figure = False,
     ),
     run_eqw_fit = dict(
         max_fwhm = 1.0,
-        eqw_linelist_fname = "/Users/alexji/Dropbox/Ant2Cra2/linelists/master_merged_eqw_short.moog",
+        eqw_linelist_fname = "/Users/alexji/Dropbox/MWMHalo/highres_followup/lesspayne_analysis/linelist_quick.moog",
         extra_eqw_linelist_fname = None,
-        mask_sigma = 0.5,
+        mask_sigma = 2.0,
         mask_smooth = 2,
         mask_thresh = 0.15,
         clear_all_existing_fits = True,
@@ -75,7 +75,7 @@ default_kws = dict(
     run_stellar_parameters = dict(
         method = "rpa_calibration",
         measure_eqw_abundances = True,
-        save_figure_eqw = True,
+        save_figure_eqw = False,
         output_suffix = None,
         manual_Teff = None,
         manual_logg = None,
@@ -92,7 +92,7 @@ default_kws = dict(
         smooth_approx = 0.1,
         smooth_scale = 0.3,
         clear_all_existing_syntheses = False,
-        save_figure = True,
+        save_figure = False,
         output_suffix = None,
     ),
     run_errors = dict(
@@ -101,9 +101,14 @@ default_kws = dict(
         e_logg = 0.2,
         e_vt = 0.2,
         e_MH = 0.2,
-        save_figure = True,
+        save_figure = False,
         output_suffix = None
-    )
+    ),
+    run_summary = dict(
+        summary_output_dir = "./outputs",
+        output_suffix = "quick",
+        quick_no_errors = True,
+    ),
 )
 
 if __name__ == "__main__":

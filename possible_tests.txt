@@ -1,0 +1,18 @@
+- Run sample HD122563 MIKE spectrum all the way through LESSPayne with a few lines.
+  1. PayneEchelle (+ figures, check they're made)
+  2. Normalization (+ figures, check they're made)
+  3. EQW (+ figures)
+  4. Stellar parameters (+ figures)
+     Automatic from PayneEchelle
+     Automatic from balancing Fe EQW
+  5. Synthesis (+ figures?)
+  6. Resynth (+ figures?)
+  7. Error script calculation
+  8. Summary (+ figures?)
+- Given a directory of reduced MIKE data:
+    Create config files
+    Run PayneEchelle on all config files
+    Get the PayneEchelle summary file
+- Load a saved SMH file into the GUI
+    It will be too much trouble to test that the GUI works...
+    But I should at least document what can be done at each step.

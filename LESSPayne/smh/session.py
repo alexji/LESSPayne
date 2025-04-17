@@ -2143,6 +2143,16 @@ class Session(BaseSession):
         new_spectrum.write(path)
         return None
     
+    def export_normalized_orders(self, path, overwrite=False):
+        """ Export the normalized spectrum before stitching (in alexspec format) """
+        assert len(self.input_spectra) == len(self.metadata["normalization"]["continuum"])
+        norms = []
+        for spec, cont in zip(self.input_spectra, self.metadata["normalization"]["continuum"]):
+            norm = specutils.Spectrum1D(spec.dispersion, spec.flux/cont, spec.ivar*cont*cont, metadata=spec.metadata)
+            norms.append(norm)
+        specutils.Spectrum1D.write_alex_spectrum_from_specs(path, norms, overwrite=overwrite)
+        return None
+    
     def get_spectral_models_species_dict(self):
         all_models = {}
         for model in self.spectral_models:
@@ -2188,3 +2198,50 @@ class Session(BaseSession):
     def add_to_notes(self, s):
         self.metadata["NOTES"] += s+"\n\n"
     
+    def identify_cosmic_rays(self, mask_sigma=5.0, mask_smooth=2, mask_thresh=0.15, dwave=0.01):
+        errs = self.normalized_spectrum.ivar**-0.5
+        errs[(errs < 0) | np.isnan(errs)] = 999.
+        mask = (normspec.flux - 1) > mask_sigma*errs
+        mask = gaussian_filter1d(mask.astype(np.float), mask_smooth) > mask_thresh
+        mask2 = np.concatenate([[False], mask]).astype(int)
+        maskdiff = np.diff(mask2)
+        starts = np.where(maskdiff == 1)[0]
+        stops = np.where(maskdiff == -1)[0]
+        if len(stops) < len(starts):
+            assert len(stops) + 1 == len(starts)
+            stops = list(stops) + [len(wave)]
+        assert len(stops) == len(starts)
+        exclude_regions_cosmic = [[normspec.dispersion[start]-dwave, normspec.dispersion[stop]+dwave] for start, stop in zip(starts, stops)]
+        logger.info(f"Exclude cosmic rays: {len(exclude_regions_cosmic)} regions")
+        self.metadata["cosmic_ray_masks"] = exclude_regions_cosmic
+    
+    def apply_spectral_model_quality_control(self, max_fwhm=1.0, max_redchi2=4, max_slope_sigma=2.5, max_ok_slope=0.0001,
+                                             set_user_flag=True):
+        Nbad = Nbad1 = Nbad2 = Nbad3 = 0
+        for model in self.spectral_models:
+            if not model.is_acceptable: continue
+            bad1 = model.fwhm > max_fwhm
+            if bad1:
+                logger.info(f"Bad FWHM: {model.species} {model.wavelength} {model.fwhm}")
+                Nbad1 += 1
+            try:
+                bad2 = model.reduced_chi2 > max_redchi2
+            except:
+                bad2 = False
+            if bad2:
+                logger.info(f"Bad chi2: {model.species} {model.wavelength} {model.reduced_chi2}")
+                Nbad2 += 1
+            try:
+                slope, slope_err = model.residual_slope_and_err
+                bad3 = (np.abs(slope/slope_err) > max_slope_sigma) and (np.abs(slope) > max_ok_slope)
+            except:
+                bad3 = False
+            if bad3:
+                logger.info(f"Bad slope: {model.species} {model.wavelength} {slope:.3e} {slope_err:.3e}")
+                Nbad3 += 1
+            if bad1 or bad2 or bad3:
+                model.is_acceptable = False
+                model.user_flag = set_user_flag
+                Nbad += 1
+        logger.info(f"Number of bad FWHM/chi2/slope: {Nbad1}/{Nbad2}/{Nbad3}")
+        logger.info(f"Total number of bad models removed: {Nbad}")

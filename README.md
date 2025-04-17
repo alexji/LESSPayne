@@ -50,9 +50,13 @@ Once this works, it is recommended you update your shell configuration to launch
 alias runsmhr='conda activate lesspayne; cd ~/LESSPayne/LESSPayne/smh/gui; pythonw __main__.py'
 ```
 
-* Install moog17scat (see below) and add it to your path.
+* Compile moog17scat (see below) and add it to your path. For example, edit your `.bash_profile` with this line:
+```
+export PATH=/path/to/moog17scat:$PATH
+```
+Then when you type `which MOOGSILENT` it should return the path to the relevant location.
 
-* Some installation notes for Linux/Debian. It takes a very long time to install pyside2 (hours?) so be patient. Thanks to Shivani Shah and Terese Hansen for this information.
+* Some installation notes for Linux/Debian: the same process works but it takes a very long time to install pyside2 (hours?) so be patient. Thanks to Shivani Shah and Terese Hansen for this information.
 
 MOOG
 ----
@@ -63,6 +67,8 @@ Note that SMHR requires you to have an executable called `MOOGSILENT` callable f
 
 This version is modified from the 2017 February version of MOOG from Chris Sneden's website. It includes Jennifer Sobeck's scattering routines (turned on and off with the flag `scat`, which is not true in the default MOOG 2017) and the fixes to the Barklem damping that were implemented in the 2014 MOOG refactoring.
 There is now a 2019 November version of MOOG, but it did not add anything different unless you use the HF molecule or work on combined spectra of globular clusters. It did also start forcing MOOG to read everything as loggf from linelists, rather than logging things if all the loggfs were positive. But in SMHR we add a fake line whenever this is detected, so it does impact anything here.
+
+Note for M1+ macs: the default shell is now `zsh`, so if you did not change the default shell on a new computer, check to make sure you edited `.zshrc` instead of the usual `.bashrc`
 
 Usage
 -----

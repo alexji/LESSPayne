@@ -22,8 +22,9 @@ if __name__=="__main__":
     parser.add_option("-3", "--eqw", dest="run_equivalent_width", action="store_true", default=False)
     parser.add_option("-4", "--params", dest="run_stellar_parameters", action="store_true", default=False)
     parser.add_option("-5", "--synth", dest="run_synthesis", action="store_true", default=False)
-    parser.add_option("-6", "--errors", dest="run_errors", action="store_true", default=False)
-    parser.add_option("-7", "--summary", dest="run_summary", action="store_true", default=False)
+    parser.add_option("-6", "--resynth", dest="run_synthesis_resynth", action="store_true", default=False)
+    parser.add_option("-7", "--errors", dest="run_errors", action="store_true", default=False)
+    parser.add_option("-8", "--summary", dest="run_summary", action="store_true", default=False)
     
     (options, args) = parser.parse_args()
     
@@ -34,6 +35,7 @@ if __name__=="__main__":
         options.run_equivalent_width = True
         options.run_stellar_parameters = True
         options.run_synthesis = True
+        options.run_synthesis_resynth = False # no need to resynth
         options.run_errors = True
     
     cfg_file = args[0]
@@ -95,7 +97,15 @@ if __name__=="__main__":
     # Optional output: synth stamp plot
     # Optional output: line abundance table
     if options.run_synthesis:
-        run_synth_fit(cfg)
+        run_synth_fit(cfg, resynth=False)
+
+    ## Resynth
+    # Input: SMHR file with syntheses fit
+    # Output: SMHR file with syntheses refit
+    # TODO Optional output: synth stamp plot
+    # TODO Optional output: line abundance table
+    if options.run_synthesis_resynth:
+        run_synth_fit(cfg, resynth=True)
     
     ## Errors
     # Input: SMHR file with all abundances you want done
@@ -112,4 +122,3 @@ if __name__=="__main__":
         run_summary(cfg)
 
     print(f"Time to run LESSPayne: {time.time()-start:.1f}")
-    

@@ -2,3 +2,7 @@
 **.pyc
 **.pkl
 LESSPayne.egg-info/*
+.ipynb_checkpoints/*
+tutorial/*
+LESSPayne/cli/generate_config.py
+**.DS_Store
