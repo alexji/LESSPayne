@@ -90,19 +90,19 @@ def run_stellar_parameters(cfg):
         Teff = logg = vt = MH = aFe = None
         
     ## Override manual
-    if spcfg["manual_Teff"] is not None:
+    if spcfg.get("manual_Teff",None) is not None:
         Teff = int(spcfg["manual_Teff"])
         print(f"Setting Teff={Teff}")
-    if spcfg["manual_logg"] is not None:
+    if spcfg.get("manual_logg",None) is not None:
         logg = round(float(spcfg["manual_logg"]),2)
         print(f"Setting logg={logg}")
-    if spcfg["manual_vt"] is not None:
+    if spcfg.get("manual_vt",None) is not None:
         vt = round(float(spcfg["manual_vt"]),2)
         print(f"Setting vt={vt}")
-    if spcfg["manual_MH"] is not None:
+    if spcfg.get("manual_MH",None) is not None:
         MH = round(float(spcfg["manual_MH"]),2)
         print(f"Setting MH={MH}")
-    if spcfg["manual_aFe"] is not None:
+    if spcfg.get("manual_aFe",None) is not None:
         aFe = round(float(spcfg["manual_aFe"]),2)
         print(f"Setting aFe={aFe}")
     
