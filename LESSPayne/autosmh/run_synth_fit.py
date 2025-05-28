@@ -144,6 +144,7 @@ def run_synth_fit(cfg, resynth=False):
     smooth_approx = scfg["smooth_approx"]
     smooth_scale = scfg["smooth_scale"]
     maxiter = scfg["max_iter_each"]
+    synth_mask_frac = scfg.get("synth_mask_frac",0.8) # TODO
     
     if scfg.get("output_suffix") is None:
         smh_outfname = smh_fname

@@ -2143,6 +2143,16 @@ class Session(BaseSession):
         new_spectrum.write(path)
         return None
     
+    def export_normalized_orders(self, path, overwrite=False):
+        """ Export the normalized spectrum before stitching (in alexspec format) """
+        assert len(self.input_spectra) == len(self.metadata["normalization"]["continuum"])
+        norms = []
+        for spec, cont in zip(self.input_spectra, self.metadata["normalization"]["continuum"]):
+            norm = specutils.Spectrum1D(spec.dispersion, spec.flux/cont, spec.ivar*cont*cont, metadata=spec.metadata)
+            norms.append(norm)
+        specutils.Spectrum1D.write_alex_spectrum_from_specs(path, norms, overwrite=overwrite)
+        return None
+    
     def get_spectral_models_species_dict(self):
         all_models = {}
         for model in self.spectral_models:

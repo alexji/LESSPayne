@@ -31,6 +31,8 @@ We are also forced to use older versions of numpy and matplotlib to maintain com
 
 For older Macs or Linux, it should work to just remove `/osx-64` and `python.app` from the above
 
+* Activate the environment, e.g. `conda activate lesspayne`
+ 
 * Download and install this branch:
 ```
 git clone https://github.com/alexji/LESSPayne.git 

@@ -202,7 +202,7 @@ class BaseSpectralModel(object):
 
     @property
     def transitions(self):
-        """ Return the transitions associateed with this class. """
+        """ Return the transitions associated with this class. """
 
         # This is left as a property to prevent users from arbitrarily setting
         # the .transitions attribute.
@@ -273,10 +273,16 @@ class BaseSpectralModel(object):
 
     @property
     def user_flag(self):
+        """
+        Return the user flag for this spectral model.
+        """
         return self.metadata["user_flag"]
 
     @user_flag.setter
     def user_flag(self, flag):
+        """
+        Set the user flag for this spectral model.
+        """
         self.metadata["user_flag"] = flag
         return None
 
@@ -452,6 +458,9 @@ class BaseSpectralModel(object):
 
     @property
     def reduced_chi2(self):
+        """
+        Return the reduced chi2 of the fit (default nan)
+        """
         try:
             (named_p_opt, cov, meta) = self.metadata["fitted_result"]
             return meta["chi_sq"] / meta["dof"]
@@ -460,6 +469,9 @@ class BaseSpectralModel(object):
             
     @property
     def chi2(self):
+        """
+        Return the chi2 of the fit (default nan)
+        """
         try:
             (named_p_opt, cov, meta) = self.metadata["fitted_result"]
             return meta["chi_sq"]
@@ -468,6 +480,9 @@ class BaseSpectralModel(object):
             
     @property
     def dof(self):
+        """
+        Return the degrees of freedom of the fit (default nan)
+        """
         try:
             (named_p_opt, cov, meta) = self.metadata["fitted_result"]
             return meta["dof"]
@@ -476,6 +491,10 @@ class BaseSpectralModel(object):
             
     @property
     def residual_slope(self):
+        """
+        Return the slope of the residuals
+        Used as quality control for model continuum fit
+        """
         try:
             (named_p_opt, cov, meta) = self.metadata["fitted_result"]
             x = meta["model_x"]
@@ -487,6 +506,10 @@ class BaseSpectralModel(object):
     
     @property
     def residual_slope_and_err(self):
+        """
+        Return the slope of the residuals and the error on the slope
+        Used as quality control for model continuum fit
+        """
         try:
             (named_p_opt, cov, meta) = self.metadata["fitted_result"]
             x = meta["model_x"]
@@ -499,6 +522,14 @@ class BaseSpectralModel(object):
             return coeff[0], merr
         except:
             return np.nan, np.nan
+    
+    def check_mask_frac(self, mask_frac=0.8):
+        """
+        Returns True if at least mask_frac of the pixels are unmasked (default 0.8)
+        """
+        spectrum = self._verify_spectrum(None)
+        mask = self.mask(spectrum)
+        return np.sum(mask) > (1-mask_frac) * len(mask)        
 
 def penalized_curve_fit_lm(f, xdata, ydata,
                            penalty_function=None,
